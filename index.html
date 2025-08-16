@@ -730,6 +730,8 @@
       padding: 80px 6.25% 40px;
       border-top: 1px solid rgba(255,255,255,0.1);
       position: relative;
+      width: 100%;
+      box-sizing: border-box;
     }
     footer::before {
       content: '';
@@ -745,6 +747,13 @@
       grid-template-columns: 2fr 1fr 1fr 1.5fr;
       gap: 50px;
       margin-bottom: 60px;
+      width: 100%;
+      min-height: auto;
+      transition: all 0.3s ease;
+    }
+    .footer-col {
+      min-width: 0; /* Prevents grid items from overflowing */
+      width: 100%;
     }
     .footer-col h4 {
       font-size: 20px;
@@ -766,14 +775,17 @@
       line-height: 1.7;
       margin: 12px 0;
       color: #94a3b8;
+      word-wrap: break-word;
     }
     .footer-col ul {
       list-style: none;
       padding: 0;
       margin: 0;
+      width: 100%;
     }
     .footer-col ul li {
       margin-bottom: 14px;
+      width: 100%;
     }
 
     .footer-col ul li a {
@@ -783,6 +795,7 @@
       padding: 6px 0;
       display: inline-block;
       position: relative;
+      word-wrap: break-word;
     }
     .footer-col ul li a:hover {
       color: #38bdf8;
@@ -814,6 +827,7 @@
       font-size: 14px;
       padding: 12px 20px;
       outline: none;
+      transition: all 0.3s ease;
     }
     .footer-col .btn-ghost:hover {
       background: rgba(255,255,255,0.15);
@@ -835,6 +849,9 @@
       padding-top: 40px;
       align-items: center;
       color: #64748b;
+      width: 100%;
+      gap: 16px;
+      transition: all 0.3s ease;
     }
     .footer-bottom > div:last-child {
       color: #94a3b8;
@@ -842,6 +859,13 @@
     }
 
     /* Responsive Design */
+    @media (max-width: 1200px){
+      .footer-grid{
+        grid-template-columns: 1.8fr 1fr 1fr 1.2fr;
+        gap: 40px;
+      }
+    }
+
     @media (max-width: 1000px){
       .hero{padding-top: 120px;}
       .hero h1{font-size:48px}
@@ -851,7 +875,10 @@
         gap:40px;
       }
       .domains{grid-template-columns:repeat(2,1fr)}
-      .footer-grid{grid-template-columns: 1fr 1fr;}
+      .footer-grid{
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
       
       .contact .form {
         padding: 40px 30px;
@@ -887,14 +914,19 @@
       .full{grid-column:1}
       .form-actions{grid-column:1}
       
+      footer {
+        padding: 60px 5% 40px;
+      }
       .footer-grid{
         grid-template-columns: 1fr;
         gap: 40px;
+        margin-bottom: 50px;
       }
       .footer-bottom{
         flex-direction: column;
         gap: 20px;
         text-align: center;
+        align-items: center;
       }
     }
 
@@ -921,6 +953,17 @@
       }
       .contact .form {
         padding: 25px 15px;
+      }
+      
+      footer {
+        padding: 50px 5% 30px;
+      }
+      .footer-grid{
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+      .footer-col h4 {
+        font-size: 18px;
       }
     }
 
@@ -1135,22 +1178,22 @@
             aria-label="Contact form">
         
         <div class="form-group">
-          <label for="name">Full Name *</label>
+          <label for="name">Full Name </label>
           <input type="text" id="name" name="entry.601502535" required autocomplete="name" placeholder="Enter your full name" />
         </div>
         
         <div class="form-group">
-          <label for="email">Email Address *</label>
+          <label for="email">Email Address </label>
           <input type="email" id="email" name="entry.141669362" required autocomplete="email" placeholder="your.email@example.com" />
         </div>
         
         <div class="form-group">
-          <label for="phone">Phone Number *</label>
+          <label for="phone">Phone Number </label>
           <input type="tel" id="phone" name="entry.1946064887" required autocomplete="tel" placeholder="+91 90000 00000" />
         </div>
         
         <div class="form-group">
-          <label for="project-type">Project Type *</label>
+          <label for="project-type">Project Type </label>
           <select id="project-type" name="entry.1331134589" required>
             <option value="">Select project type...</option>
             <option value="Final Year Project">Final Year Project</option>
@@ -1162,7 +1205,7 @@
         </div>
         
         <div class="form-group full">
-          <label for="details">Project or Assignment Details *</label>
+          <label for="details">Project or Assignment Details </label>
           <textarea id="details" 
                     name="entry.166046264" 
                     rows="5" 
@@ -1243,13 +1286,33 @@
         svg.innerHTML = '<path d="M3 12h18M3 6h18M3 18h18"/>';
       }
       
+      // Function to force layout reflow for footer
+      function forceFooterReflow() {
+        const footer = document.querySelector('footer');
+        const footerGrid = document.querySelector('.footer-grid');
+        const footerBottom = document.querySelector('.footer-bottom');
+        
+        if (footer && footerGrid && footerBottom) {
+          // Temporarily hide and show to force reflow
+          footer.style.visibility = 'hidden';
+          footer.offsetHeight; // Trigger reflow
+          footer.style.visibility = 'visible';
+        }
+      }
+      
       // Function to check if viewport is mobile
       function checkViewport() {
         const newIsMobile = window.innerWidth <= 768;
         
-        // If switching from mobile to desktop, reset nav state
+        // If switching from mobile to desktop, reset nav state and force footer reflow
         if (isMobile && !newIsMobile) {
           resetNavState();
+          setTimeout(forceFooterReflow, 100); // Small delay to ensure CSS transitions complete
+        }
+        
+        // If switching from desktop to mobile, also force reflow
+        if (!isMobile && newIsMobile) {
+          setTimeout(forceFooterReflow, 100);
         }
         
         isMobile = newIsMobile;
