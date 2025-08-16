@@ -1229,12 +1229,51 @@
   </footer>
 
   <script>
-    // Mobile menu functionality
+    // Enhanced mobile menu functionality with viewport change handling
     document.addEventListener('DOMContentLoaded', function() {
       const menuToggle = document.querySelector('.menu-toggle');
       const nav = document.querySelector('nav');
+      let isMobile = window.innerWidth <= 768;
       
-      menuToggle.addEventListener('click', function() {
+      // Function to reset navigation state
+      function resetNavState() {
+        nav.classList.remove('active');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        const svg = menuToggle.querySelector('svg');
+        svg.innerHTML = '<path d="M3 12h18M3 6h18M3 18h18"/>';
+      }
+      
+      // Function to check if viewport is mobile
+      function checkViewport() {
+        const newIsMobile = window.innerWidth <= 768;
+        
+        // If switching from mobile to desktop, reset nav state
+        if (isMobile && !newIsMobile) {
+          resetNavState();
+        }
+        
+        isMobile = newIsMobile;
+      }
+      
+      // Handle viewport changes (orientation change, window resize)
+      let resizeTimeout;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+          checkViewport();
+        }, 150);
+      });
+      
+      // Handle orientation change specifically for mobile devices
+      window.addEventListener('orientationchange', function() {
+        setTimeout(function() {
+          checkViewport();
+        }, 300); // Delay to ensure viewport dimensions are updated
+      });
+      
+      // Mobile menu toggle functionality
+      menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
         nav.classList.toggle('active');
         
         // Update aria-expanded for accessibility
@@ -1250,25 +1289,34 @@
         }
       });
       
-      // Close mobile menu when clicking on a link
+      // Close mobile menu when clicking on a navigation link
       document.querySelectorAll('nav a').forEach(link => {
         link.addEventListener('click', function() {
-          nav.classList.remove('active');
-          menuToggle.setAttribute('aria-expanded', 'false');
-          const svg = menuToggle.querySelector('svg');
-          svg.innerHTML = '<path d="M3 12h18M3 6h18M3 18h18"/>';
+          if (isMobile) {
+            resetNavState();
+          }
         });
       });
       
-      // Close mobile menu when clicking outside
+      // Close mobile menu when clicking outside (only in mobile)
       document.addEventListener('click', function(event) {
-        if (!nav.contains(event.target) && !menuToggle.contains(event.target)) {
-          nav.classList.remove('active');
-          menuToggle.setAttribute('aria-expanded', 'false');
-          const svg = menuToggle.querySelector('svg');
-          svg.innerHTML = '<path d="M3 12h18M3 6h18M3 18h18"/>';
+        if (isMobile && nav.classList.contains('active')) {
+          if (!nav.contains(event.target) && !menuToggle.contains(event.target)) {
+            resetNavState();
+          }
         }
       });
+      
+      // Close mobile menu on escape key
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && isMobile && nav.classList.contains('active')) {
+          resetNavState();
+          menuToggle.focus(); // Return focus to menu button
+        }
+      });
+      
+      // Initialize viewport check
+      checkViewport();
     });
 
     // Active navigation highlighting
@@ -1312,8 +1360,15 @@
       });
     });
 
-    // Update active nav on scroll
-    window.addEventListener('scroll', updateActiveNav);
+    // Update active nav on scroll with throttling for better performance
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = setTimeout(updateActiveNav, 10);
+    });
+    
     window.addEventListener('load', updateActiveNav);
 
     // Enhanced form submission handler
